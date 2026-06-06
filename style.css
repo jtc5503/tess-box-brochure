@@ -9,27 +9,27 @@
   background-color: #f4f5f7;
   font-family: sans-serif;
   overflow: hidden;
-  perspective: 1500px; /* Gives the 3D depth */
+  perspective: 2000px; /* Increased depth for a better 3D look */
 }
 
 /* The 3D Space */
 .scene {
   width: 90vw;
-  max-width: 900px; /* Max width of fully opened brochure */
-  aspect-ratio: 3 / 1.5; /* Adjust based on your actual 3-panel ratio */
+  max-width: 1000px; /* Slightly wider to accommodate tall panels nicely */
+  aspect-ratio: 1.25; /* FIXED: Mathematically adjusted for your tall panels */
   position: relative;
   display: flex;
   justify-content: center;
   margin-bottom: 2rem;
 }
 
-/* The Main Brochure Object */
+/* The Main Brochure Object (The Center Panel acts as the anchor) */
 .brochure {
   width: 33.333%;
   height: 100%;
   position: relative;
   transform-style: preserve-3d;
-  transition: transform 1s cubic-bezier(0.25, 1, 0.5, 1); /* Physical, slightly bouncy feel */
+  transition: transform 1s cubic-bezier(0.25, 1, 0.5, 1);
 }
 
 /* Flips the entire brochure around to see the back */
@@ -46,32 +46,34 @@
 }
 
 .left-panel {
-  transform-origin: right center;
-  transform: rotateY(178deg) translateZ(2px); /* Closed by default */
-  transition: transform 1.2s cubic-bezier(0.34, 1.56, 0.64, 1); /* Bouncy open */
+  left: -100%; /* FIXED: This pulls the panel to the left side of the center! */
+  transform-origin: right center; /* Hinges on the right edge */
+  transform: rotateY(180deg) translateZ(2px); /* Closed by default */
+  transition: transform 1.2s cubic-bezier(0.34, 1.56, 0.64, 1);
   z-index: 2;
 }
 
 .center-panel {
+  left: 0;
   transform: translateZ(0px);
   z-index: 1;
 }
 
 .right-panel {
-  left: 100%;
-  transform-origin: left center;
-  transform: rotateY(-178deg) translateZ(1px); /* Closed by default */
-  transition: transform 1s cubic-bezier(0.34, 1.56, 0.64, 1) 0.15s; /* 0.15s stagger */
+  left: 100%; /* Sits to the right of center */
+  transform-origin: left center; /* Hinges on the left edge */
+  transform: rotateY(-180deg) translateZ(1px); /* Closed by default */
+  transition: transform 1s cubic-bezier(0.34, 1.56, 0.64, 1) 0.15s;
   z-index: 2;
 }
 
 /* Open State */
 .brochure.is-open .left-panel {
-  transform: rotateY(0deg) translateX(-100%);
+  transform: rotateY(0deg) translateZ(0px); /* FIXED: Swings open to 0 degrees */
 }
 
 .brochure.is-open .right-panel {
-  transform: rotateY(0deg) translateX(0%);
+  transform: rotateY(0deg) translateZ(0px); /* FIXED: Swings open to 0 degrees */
 }
 
 /* Panel Faces */
@@ -79,10 +81,11 @@
   position: absolute;
   width: 100%;
   height: 100%;
-  backface-visibility: hidden; /* Hides the reverse side of the div */
+  backface-visibility: hidden;
   background-size: cover;
   background-position: center;
   border: 1px solid rgba(0,0,0,0.1);
+  background-color: white; /* Prevents transparent bleeding */
 }
 
 .face.back {
@@ -99,9 +102,8 @@
   pointer-events: none;
 }
 
-/* Turn off shadows when fully flat/open */
 .brochure.is-open .shadow-overlay {
-  opacity: 0.1; 
+  opacity: 0.05; 
 }
 
 /* Controls */
@@ -116,7 +118,7 @@ button {
   font-size: 16px;
   font-weight: bold;
   color: white;
-  background-color: #003366; /* Matching the TESS Box blue */
+  background-color: #003366; 
   border: none;
   border-radius: 8px;
   cursor: pointer;
