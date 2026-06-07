@@ -74,7 +74,8 @@
   transform: rotateY(0deg) translateZ(1px); 
 }
 .brochure.step-1 .right-panel {
-  transform: rotateY(-180deg) translateZ(2px); /* Popped up slightly to avoid scraping */
+  /* FIXED: A negative Z-value pulls it forward while it is rotated backwards! */
+  transform: rotateY(-180deg) translateZ(-2px); 
 }
 
 /* STATE 2: Fully Open */
