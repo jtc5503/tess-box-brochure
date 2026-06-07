@@ -29,8 +29,8 @@
   height: 100%;
   position: relative;
   transform-style: preserve-3d;
-  /* Smoother, paper-like flip */
-  transition: transform 0.9s cubic-bezier(0.4, 0, 0.2, 1);
+  /* Smooth paper turn for the flip */
+  transition: transform 0.85s cubic-bezier(0.645, 0.045, 0.355, 1);
 }
 
 .brochure.is-flipped {
@@ -50,8 +50,8 @@
   left: -100%; 
   transform-origin: right center; 
   transform: rotateY(180deg) translateZ(-2px); 
-  /* Smooth paper turn */
-  transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  /* Paper-feel bezier curve */
+  transition: transform 0.85s cubic-bezier(0.645, 0.045, 0.355, 1);
   z-index: 3;
 }
 
@@ -65,17 +65,16 @@
   left: 100%; 
   transform-origin: left center; 
   transform: rotateY(-180deg) translateZ(-1px); 
-  transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: transform 0.85s cubic-bezier(0.645, 0.045, 0.355, 1);
   z-index: 2;
 }
 
 /* STATE 1: Cover Open (Revealing the Inside Flap) */
 .brochure.step-1 .left-panel {
-  /* Z depth of 1px prevents it from scraping the center panel */
   transform: rotateY(0deg) translateZ(1px); 
 }
 .brochure.step-1 .right-panel {
-  transform: rotateY(-180deg) translateZ(-1px); 
+  transform: rotateY(-180deg) translateZ(2px); /* Popped up slightly to avoid scraping */
 }
 
 /* STATE 2: Fully Open */
@@ -108,7 +107,7 @@
   inset: 0;
   background: linear-gradient(to right, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0) 20%, rgba(0,0,0,0) 80%, rgba(0,0,0,0.3) 100%);
   opacity: 1;
-  transition: opacity 1s ease;
+  transition: opacity 0.85s ease;
   pointer-events: none;
 }
 
