@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   let state = 0; // 0: Closed, 1: Cover Open, 2: Fully Open
   let isFlipped = false;
-  let isAnimating = false; // Prevents button spamming
+  let isAnimating = false; 
 
   const updateState = () => {
     brochure.classList.remove('step-1', 'step-2');
@@ -32,12 +32,29 @@ document.addEventListener('DOMContentLoaded', () => {
         state = 1;
         updateState();
         isAnimating = false;
-      }, 900); // Waits for the flip to finish
+      }, 900); 
       return;
     }
 
-    state = (state + 1) % 3; 
-    updateState();
+    if (state === 0) {
+      state = 1;
+      updateState();
+    } else if (state === 1) {
+      state = 2;
+      updateState();
+    } else if (state === 2) {
+      // STAGGERED CLOSE: Right flap first, then left cover
+      isAnimating = true;
+      state = 1; 
+      updateState();
+      btnState.textContent = "Closing..."; // Optional feedback
+
+      setTimeout(() => {
+        state = 0; 
+        updateState();
+        isAnimating = false;
+      }, 850); // Matches the 0.85s CSS transition
+    }
   };
 
   const executeFlip = () => {
@@ -54,16 +71,28 @@ document.addEventListener('DOMContentLoaded', () => {
   const toggleFlip = () => {
     if (isAnimating) return;
 
-    // If the brochure is open, fold it up FIRST, then flip it
-    if (state !== 0) { 
+    if (state === 2) {
+      // If fully open, close right, close left, THEN flip
+      isAnimating = true;
+      state = 1;
+      updateState();
+      setTimeout(() => {
+        state = 0;
+        updateState();
+        setTimeout(() => {
+          executeFlip();
+          isAnimating = false;
+        }, 850);
+      }, 850);
+    } else if (state === 1) {
+      // If only cover open, close it, THEN flip
+      isAnimating = true;
       state = 0;
       updateState();
-      isAnimating = true;
-      
       setTimeout(() => {
         executeFlip();
         isAnimating = false;
-      }, 800); // Waits for the folding to finish
+      }, 850);
     } else {
       executeFlip();
     }
