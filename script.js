@@ -5,15 +5,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
   let state = 0; // 0: Closed, 1: Cover Open, 2: Fully Open
   let isFlipped = false;
+  let isAnimating = false; // Prevents button spamming
 
   const updateState = () => {
-    // Reset classes
     brochure.classList.remove('step-1', 'step-2');
     
     if (state === 1) {
       brochure.classList.add('step-1');
       btnState.textContent = "Open Inside Flap";
-      if (isFlipped) toggleFlip(); // Don't allow opening backwards
     } else if (state === 2) {
       brochure.classList.add('step-2');
       btnState.textContent = "Close Brochure";
@@ -23,23 +22,50 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   const cycleState = () => {
-    state = (state + 1) % 3; // Cycles 0 -> 1 -> 2 -> 0
+    if (isAnimating) return;
+    
+    // If looking at the back, flip to front first, then open
+    if (isFlipped) {
+      executeFlip();
+      isAnimating = true;
+      setTimeout(() => {
+        state = 1;
+        updateState();
+        isAnimating = false;
+      }, 900); // Waits for the flip to finish
+      return;
+    }
+
+    state = (state + 1) % 3; 
     updateState();
   };
 
-  const toggleFlip = () => {
+  const executeFlip = () => {
     isFlipped = !isFlipped;
     if (isFlipped) {
       brochure.classList.add('is-flipped');
       btnFlip.textContent = "View Front";
-      // If they try to look at the back while open, close it first
-      if (state !== 0) { 
-        state = 0;
-        updateState();
-      }
     } else {
       brochure.classList.remove('is-flipped');
       btnFlip.textContent = "Flip to Back";
+    }
+  };
+
+  const toggleFlip = () => {
+    if (isAnimating) return;
+
+    // If the brochure is open, fold it up FIRST, then flip it
+    if (state !== 0) { 
+      state = 0;
+      updateState();
+      isAnimating = true;
+      
+      setTimeout(() => {
+        executeFlip();
+        isAnimating = false;
+      }, 800); // Waits for the folding to finish
+    } else {
+      executeFlip();
     }
   };
 
@@ -51,18 +77,18 @@ document.addEventListener('DOMContentLoaded', () => {
   let touchEndX = 0;
 
   const handleSwipe = () => {
+    if (isAnimating) return;
     const swipeThreshold = 50; 
     const swipeDistance = touchEndX - touchStartX;
 
     if (swipeDistance > swipeThreshold) {
-      // Swipe Right (Open further)
       if (state < 2 && !isFlipped) {
         state++;
         updateState();
+      } else if (isFlipped) {
+        toggleFlip();
       }
-      if (isFlipped) toggleFlip();
     } else if (swipeDistance < -swipeThreshold) {
-      // Swipe Left (Close)
       if (state > 0) {
         state--;
         updateState();
