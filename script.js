@@ -1,40 +1,49 @@
 document.addEventListener('DOMContentLoaded', () => {
   const brochure = document.getElementById('brochure');
-  const btnOpen = document.getElementById('toggle-open');
+  const btnState = document.getElementById('toggle-state');
   const btnFlip = document.getElementById('toggle-flip');
 
-  let isOpen = false;
+  let state = 0; // 0: Closed, 1: Cover Open, 2: Fully Open
   let isFlipped = false;
 
-  // Toggle Open/Closed
-  const toggleOpen = () => {
-    isOpen = !isOpen;
-    if (isOpen) {
-      brochure.classList.add('is-open');
-      btnOpen.textContent = "Close Brochure";
-      // Ensure we aren't looking at the back when we open it
-      if (isFlipped) toggleFlip(); 
+  const updateState = () => {
+    // Reset classes
+    brochure.classList.remove('step-1', 'step-2');
+    
+    if (state === 1) {
+      brochure.classList.add('step-1');
+      btnState.textContent = "Open Inside Flap";
+      if (isFlipped) toggleFlip(); // Don't allow opening backwards
+    } else if (state === 2) {
+      brochure.classList.add('step-2');
+      btnState.textContent = "Close Brochure";
     } else {
-      brochure.classList.remove('is-open');
-      btnOpen.textContent = "Open Brochure";
+      btnState.textContent = "Open Cover";
     }
   };
 
-  // Toggle Front/Back
+  const cycleState = () => {
+    state = (state + 1) % 3; // Cycles 0 -> 1 -> 2 -> 0
+    updateState();
+  };
+
   const toggleFlip = () => {
     isFlipped = !isFlipped;
     if (isFlipped) {
       brochure.classList.add('is-flipped');
       btnFlip.textContent = "View Front";
-      // Close it if they try to look at the back while it's open
-      if (isOpen) toggleOpen(); 
+      // If they try to look at the back while open, close it first
+      if (state !== 0) { 
+        state = 0;
+        updateState();
+      }
     } else {
       brochure.classList.remove('is-flipped');
       btnFlip.textContent = "Flip to Back";
     }
   };
 
-  btnOpen.addEventListener('click', toggleOpen);
+  btnState.addEventListener('click', cycleState);
   btnFlip.addEventListener('click', toggleFlip);
 
   // --- Mobile Swipe Mechanics ---
@@ -42,21 +51,27 @@ document.addEventListener('DOMContentLoaded', () => {
   let touchEndX = 0;
 
   const handleSwipe = () => {
-    const swipeThreshold = 50; // Minimum pixel distance to trigger swipe
+    const swipeThreshold = 50; 
     const swipeDistance = touchEndX - touchStartX;
 
     if (swipeDistance > swipeThreshold) {
-      // Swipe Right -> Open it
-      if (!isOpen && !isFlipped) toggleOpen();
-      if (isFlipped) toggleFlip(); // unflip if looking at the back
+      // Swipe Right (Open further)
+      if (state < 2 && !isFlipped) {
+        state++;
+        updateState();
+      }
+      if (isFlipped) toggleFlip();
     } else if (swipeDistance < -swipeThreshold) {
-      // Swipe Left -> Close it, or flip to back
-      if (isOpen) toggleOpen();
-      else if (!isFlipped) toggleFlip();
+      // Swipe Left (Close)
+      if (state > 0) {
+        state--;
+        updateState();
+      } else if (!isFlipped) {
+        toggleFlip();
+      }
     }
   };
 
-  // Attach touch listeners to the container
   const container = document.querySelector('.survey-brochure-container');
   
   container.addEventListener('touchstart', (e) => {
