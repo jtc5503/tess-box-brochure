@@ -1,4 +1,4 @@
-/* Scoped Container to prevent conflicts */
+/* Scoped Container */
 .survey-brochure-container {
   display: flex;
   flex-direction: column;
@@ -9,21 +9,21 @@
   background-color: #f4f5f7;
   font-family: sans-serif;
   overflow: hidden;
-  perspective: 2000px; /* Increased depth for a better 3D look */
+  perspective: 2000px; 
 }
 
 /* The 3D Space */
 .scene {
   width: 90vw;
-  max-width: 1000px; /* Slightly wider to accommodate tall panels nicely */
-  aspect-ratio: 1.25; /* FIXED: Mathematically adjusted for your tall panels */
+  max-width: 1000px; 
+  aspect-ratio: 1.25; 
   position: relative;
   display: flex;
   justify-content: center;
   margin-bottom: 2rem;
 }
 
-/* The Main Brochure Object (The Center Panel acts as the anchor) */
+/* The Main Brochure Object */
 .brochure {
   width: 33.333%;
   height: 100%;
@@ -32,7 +32,6 @@
   transition: transform 1s cubic-bezier(0.25, 1, 0.5, 1);
 }
 
-/* Flips the entire brochure around to see the back */
 .brochure.is-flipped {
   transform: rotateY(180deg);
 }
@@ -45,12 +44,14 @@
   transform-style: preserve-3d;
 }
 
+/* DEFAULT STATE (Fully Closed) */
 .left-panel {
-  left: -100%; /* FIXED: This pulls the panel to the left side of the center! */
-  transform-origin: right center; /* Hinges on the right edge */
-  transform: rotateY(180deg) translateZ(2px); /* Closed by default */
-  transition: transform 1.2s cubic-bezier(0.34, 1.56, 0.64, 1);
-  z-index: 2;
+  left: -100%; 
+  transform-origin: right center; 
+  /* translateZ(-2px) brings it to the top of the stack when folded */
+  transform: rotateY(180deg) translateZ(-2px); 
+  transition: transform 1s cubic-bezier(0.34, 1.56, 0.64, 1);
+  z-index: 3;
 }
 
 .center-panel {
@@ -60,20 +61,28 @@
 }
 
 .right-panel {
-  left: 100%; /* Sits to the right of center */
-  transform-origin: left center; /* Hinges on the left edge */
-  transform: rotateY(-180deg) translateZ(1px); /* Closed by default */
-  transition: transform 1s cubic-bezier(0.34, 1.56, 0.64, 1) 0.15s;
+  left: 100%; 
+  transform-origin: left center; 
+  /* translateZ(-1px) puts it underneath the front cover, but above the center */
+  transform: rotateY(-180deg) translateZ(-1px); 
+  transition: transform 1s cubic-bezier(0.34, 1.56, 0.64, 1);
   z-index: 2;
 }
 
-/* Open State */
-.brochure.is-open .left-panel {
-  transform: rotateY(0deg) translateZ(0px); /* FIXED: Swings open to 0 degrees */
+/* STATE 1: Cover Open (Revealing the Inside Flap) */
+.brochure.step-1 .left-panel {
+  transform: rotateY(0deg) translateZ(0px); 
+}
+.brochure.step-1 .right-panel {
+  transform: rotateY(-180deg) translateZ(-1px); /* Stays closed over center */
 }
 
-.brochure.is-open .right-panel {
-  transform: rotateY(0deg) translateZ(0px); /* FIXED: Swings open to 0 degrees */
+/* STATE 2: Fully Open */
+.brochure.step-2 .left-panel {
+  transform: rotateY(0deg) translateZ(0px); 
+}
+.brochure.step-2 .right-panel {
+  transform: rotateY(0deg) translateZ(0px); 
 }
 
 /* Panel Faces */
@@ -85,7 +94,7 @@
   background-size: cover;
   background-position: center;
   border: 1px solid rgba(0,0,0,0.1);
-  background-color: white; /* Prevents transparent bleeding */
+  background-color: white; 
 }
 
 .face.back {
@@ -102,7 +111,8 @@
   pointer-events: none;
 }
 
-.brochure.is-open .shadow-overlay {
+.brochure.step-1 .left-panel .shadow-overlay,
+.brochure.step-2 .shadow-overlay {
   opacity: 0.05; 
 }
 
